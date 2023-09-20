@@ -8,45 +8,39 @@ GLvoid Reshape(int w, int h);
 GLvoid drawScene(GLvoid);
 GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Mouse(int button, int state, int x, int y);
-GLvoid Motion(int x, int y);
+GLvoid TimerFunction(int value);
 
-int cnt = 1;
-bool left_button;
+int cnt = 0;
+bool pause;
+bool pressA, pressI, pressC, pressO;
 typedef struct _rect {
-  float x1;
-  float y1;
-  float x2;
-  float y2;
-  float r;
-  float g;
-  float b;
-  bool in;
+  float x1;  float y1;
+  float x2;  float y2;
+  float r;  float g;  float b;
+  int directX;  int directY;
+  float speed;
 } rect;
 rect Rect[5];
-void convertDeviceXY2OpenglXY(int x, int y, float* ox, float* oy) {
+
+void convertDeviceXY2OpenglXY(int x, int y, float* ox, float* oy) 
+{
   int w = 800;
   int h = 800;
   *ox = (float)((x - (float)w / 2.0) * (float)(1.0 / (float)(w / 2.0)));
   *oy = -(float)((y - (float)h / 2.0) * (float)(1.0 / (float)(h / 2.0)));
 }
 
-bool isinRect(float mx, float my, float x1, float y1, float x2, float y2) {
+bool isinRect(float mx, float my, float x1, float y1, float x2, float y2)
+{
   if (mx >= x1 && my >= y1 && mx <= x2 && my <= y2) {
     return true;
   } else
     return false;
 }
 
-void Init() {
-  Rect[0] = {-0.1f,
-             -0.1f,
-             0.1f,
-             0.1f,
-             (rand() % 256) / 255.0f,
-             (rand() % 256) / 255.0f,
-             (rand() % 256) / 255.0f,
-             false};
-  for (int i = 1; i < 5; ++i) {
+void Init() 
+{
+  for (int i = 0; i < 5; ++i) {
     Rect[i] = {NULL};
   }
 }
@@ -76,7 +70,6 @@ void main(int argc, char** argv)  // 윈도우 출력하고 콜백함수 설정
   glutReshapeFunc(Reshape);    // 다시 그리기 콜백함수 지정
   glutKeyboardFunc(Keyboard);  // 키보드 입력 콜백함수 지정
   glutMouseFunc(Mouse);
-  glutMotionFunc(Motion);
   glutMainLoop();  // 이벤트 처리 시작
 }
 
@@ -101,25 +94,17 @@ GLvoid Reshape(int w, int h)  //--- 콜백 함수: 다시 그리기 콜백 함수
 GLvoid Keyboard(unsigned char key, int x, int y) {
   switch (key) {
     case 'a':
-      // 사각형 추가
-      if (cnt <= 5) {
-        int rx = rand() % 800, ry = rand() & 800;
-        float rx_c, ry_c;
-        convertDeviceXY2OpenglXY(rx, ry, &rx_c, &ry_c);
-
-        Rect[cnt] = {rx_c - 0.1f,
-                     ry_c - 0.1f,
-                     rx_c + 0.1f,
-                     ry_c + 0.1f,
-                     (rand() % 256) / 255.0f,
-                     (rand() % 256) / 255.0f,
-                     (rand() % 256) / 255.0f,
-                     false};
-
-        cnt++;
-      }
+      pressA = !pressA;
+      glutTimerFunc(30, TimerFunction, 1);
       break;
     case 'i':
+      break;
+    case 's':
+      pause = !pause;
+      break;
+    case 'r':
+      cnt = 0;
+    Init();
       break;
     case 'q':
       glutLeaveMainLoop();
@@ -131,41 +116,42 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 
 GLvoid Mouse(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-    left_button = true;
-  }
+    // 사각형 추가
+    if (cnt <= 5) {
+      float mx, my;
+      convertDeviceXY2OpenglXY(x, y, &mx, &my);
 
-  else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-    left_button = false;
+      Rect[cnt] = {mx - 0.05f,
+                   my - 0.05f,
+                   mx + 0.05f,
+                   my + 0.05f,
+                   (rand() % 256) / 255.0f,
+                   (rand() % 256) / 255.0f,
+                   (rand() % 256) / 255.0f,
+                    1, 1, 0.01f};
+      cnt++;
+    }
   }
 }
 
-GLvoid Motion(int x, int y) {
-  int i;
+GLvoid TimerFunction(int value)
+{
+  for (int i = 0; i < 5; ++i) {
+      //위치 변화
+    if (pressA) {
+      Rect[i].x1 += Rect[i].speed * Rect[i].directX;
+      Rect[i].y1 += Rect[i].speed * Rect[i].directY;
+      Rect[i].x2 += Rect[i].speed * Rect[i].directX;
+      Rect[i].y2 += Rect[i].speed * Rect[i].directY;
 
-  if (left_button == true) {
-    float mx, my;
-    convertDeviceXY2OpenglXY(x, y, &mx, &my);
-
-    for (i = 0; i < 5; i++) {
-      Rect[i].in =
-          isinRect(mx, my, Rect[i].x1, Rect[i].y1, Rect[i].x2, Rect[i].y2);
-      if (Rect[i].in) break;
+      if (Rect[i].x1 <= 0.0f) {
+        Rect[i].directX = 1;
+      }
+      if (Rect[i].x2>=1.0f)
     }
-
-    float centerX = (Rect[i].x1 + Rect[i].x2) / 2.0f;
-    float centerY = (Rect[i].y1 + Rect[i].y2) / 2.0f;
-
-    if (Rect[i].in) {
-      // 마우스 이동에 따라 중심 위치 변경
-      centerX = mx;
-      centerY = my;
-
-      // 변경된 중심 위치를 기반으로 사각형 좌상단, 우하단 좌표 업데이트
-      Rect[i].x1 = centerX - 0.1f;
-      Rect[i].y1 = centerY - 0.1f;
-      Rect[i].x2 = centerX + 0.1f;
-      Rect[i].y2 = centerY + 0.1f;
-    }
-    glutPostRedisplay();
+  }
+  glutPostRedisplay();
+  if (!pause) {
+    glutTimerFunc(30, TimerFunction, 1);
   }
 }
