@@ -17,8 +17,8 @@ typedef struct _rect {
   float x1;  float y1;
   float x2;  float y2;
   float r;  float g;  float b;
-  int directX;  int directY;
   float speed;
+  int directX;  int directY;
 } rect;
 rect Rect[5];
 
@@ -95,14 +95,16 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
   switch (key) {
     case 'a':
       pressA = !pressA;
-      glutTimerFunc(30, TimerFunction, 1);
       break;
     case 'i':
       break;
     case 's':
-      pause = !pause;
+        pause = !pause;
+      glutTimerFunc(50, TimerFunction, 1);
       break;
     case 'r':
+       pause = true;
+       pressA = false;   pressI = false; pressC = false; pressO = false;
       cnt = 0;
     Init();
       break;
@@ -128,7 +130,10 @@ GLvoid Mouse(int button, int state, int x, int y) {
                    (rand() % 256) / 255.0f,
                    (rand() % 256) / 255.0f,
                    (rand() % 256) / 255.0f,
-                    1, 1, 0.01f};
+                    0.01f};
+      Rect[cnt].directX = (rand() % 2 == 0) ? 1 : -1;
+      Rect[cnt].directY = (rand() % 2 == 0) ? 1 : -1;
+
       cnt++;
     }
   }
@@ -136,22 +141,47 @@ GLvoid Mouse(int button, int state, int x, int y) {
 
 GLvoid TimerFunction(int value)
 {
-  for (int i = 0; i < 5; ++i) {
-      //위치 변화
-    if (pressA) {
-      Rect[i].x1 += Rect[i].speed * Rect[i].directX;
-      Rect[i].y1 += Rect[i].speed * Rect[i].directY;
-      Rect[i].x2 += Rect[i].speed * Rect[i].directX;
-      Rect[i].y2 += Rect[i].speed * Rect[i].directY;
+    for (int i = 0; i < 5; ++i) {
+        //위치 변화
+        if (pressA) {
+            int direction = 0;
+            if (Rect[i].x1 <= -1.0f) direction = 1;
+            else if (Rect[i].y1 <= -1.0f) direction = 2;
+            else if (Rect[i].x2 >= 1.0f) direction = 3;
+            else if (Rect[i].y2 >= 1.0f) direction = 4;
 
-      if (Rect[i].x1 <= 0.0f) {
-        Rect[i].directX = 1;
-      }
-      if (Rect[i].x2>=1.0f)
+            switch (direction) {
+            case 1:
+                Rect[i].directX = 1;
+                Rect[i].directY = 1;
+                break;
+            case 2:
+                Rect[i].directX = -1;
+                Rect[i].directY = 1;
+                break;
+            case 3:
+                Rect[i].directX = -1;
+                Rect[i].directY = -1;
+                break;
+            case 4:
+                Rect[i].directX = 1;
+                Rect[i].directY = -1;
+                break;
+            }
+
+            // 사각형의 위치 업데이트
+            Rect[i].x1 += Rect[i].directX * Rect[i].speed;
+            Rect[i].x2 += Rect[i].directX * Rect[i].speed;
+            Rect[i].y1 += Rect[i].directY * Rect[i].speed;
+            Rect[i].y2 += Rect[i].directY * Rect[i].speed;
+        }
     }
-  }
-  glutPostRedisplay();
-  if (!pause) {
-    glutTimerFunc(30, TimerFunction, 1);
-  }
+
+
+    glutPostRedisplay();
+
+    if (!pause) {
+        glutTimerFunc(50, TimerFunction, 1);
+    }
+
 }
