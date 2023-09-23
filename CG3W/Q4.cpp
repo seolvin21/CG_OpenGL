@@ -11,7 +11,8 @@ GLvoid Mouse(int button, int state, int x, int y);
 GLvoid TimerFunction(int value);
 
 int cnt = 0;
-int cnt_i = 0;
+int cnt_i = 0, cnt_c = 0;
+bool max = false;
 bool pause;
 bool pressA, pressI, pressC, pressO;
 typedef struct _rect {
@@ -102,6 +103,9 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
         pressA = false;
         pressI = !pressI;
       break;
+    case 'c':
+        pressC = !pressC;
+        break;
     case 'o':
         pressO = !pressO;
         break;
@@ -199,6 +203,29 @@ GLvoid TimerFunction(int value)
 
             Rect[i].y1 += Rect[i].directY * Rect[i].speed;
             Rect[i].y2 += Rect[i].directY * Rect[i].speed;
+        }
+
+        if (pressC) {
+            if (!max) {
+                Rect[i].x1 -= Rect[i].directX * Rect[i].speed;
+                Rect[i].x2 += Rect[i].directX * Rect[i].speed;
+                Rect[i].y1 -= Rect[i].directY * Rect[i].speed;
+                Rect[i].y2 += Rect[i].directY * Rect[i].speed;
+                cnt_c++;
+                if(cnt_c>=30) {
+                    max = true;
+                }
+            }
+            else if (max) {
+                Rect[i].x1 += Rect[i].directX * Rect[i].speed;
+                Rect[i].x2 -= Rect[i].directX * Rect[i].speed;
+                Rect[i].y1 += Rect[i].directY * Rect[i].speed;
+                Rect[i].y2 -= Rect[i].directY * Rect[i].speed;
+                cnt_c--;
+                if (cnt_c <= 0) {
+                    max = false;
+                }
+            }
         }
 
         if (pressO) {
