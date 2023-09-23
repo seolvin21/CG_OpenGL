@@ -12,7 +12,7 @@ GLvoid TimerFunction(int value);
 
 int cnt = 0;
 int cnt_i = 0, cnt_c = 0;
-bool max = false;
+bool max_c = false, max_i = false;
 bool pause;
 bool pressA, pressI, pressC, pressO;
 typedef struct _rect {
@@ -189,16 +189,28 @@ GLvoid TimerFunction(int value)
 
         else if (pressI) {
             Rect[i].directX = 1;
+
+            if (Rect[i].x2 >= 1.0f) {
+                Rect[i].x1 = -1.0f;
+                Rect[i].x2 = Rect[i].x1 + 0.1f;
+            }
+
             Rect[i].x1 += Rect[i].directX * Rect[i].speed;
             Rect[i].x2 += Rect[i].directX * Rect[i].speed;
 
-            if (cnt_i <= 200) {
+            if (!max_i) {
                 Rect[i].directY = 1;
                 cnt_i++;
+                if (cnt_i >= 70) {
+                    max_i = true;
+                }
             }
-            else if (cnt_i >= 200) {
+            else if (max_i) {
                 Rect[i].directY = -1;
                 cnt_i--;
+                if (cnt_i <= 0) {
+                    max_i = false;
+                }
             }
 
             Rect[i].y1 += Rect[i].directY * Rect[i].speed;
@@ -206,24 +218,24 @@ GLvoid TimerFunction(int value)
         }
 
         if (pressC) {
-            if (!max) {
+            if (!max_c) {
                 Rect[i].x1 -= Rect[i].directX * Rect[i].speed;
                 Rect[i].x2 += Rect[i].directX * Rect[i].speed;
                 Rect[i].y1 -= Rect[i].directY * Rect[i].speed;
                 Rect[i].y2 += Rect[i].directY * Rect[i].speed;
                 cnt_c++;
                 if(cnt_c>=30) {
-                    max = true;
+                    max_c = true;
                 }
             }
-            else if (max) {
+            else if (max_c) {
                 Rect[i].x1 += Rect[i].directX * Rect[i].speed;
                 Rect[i].x2 -= Rect[i].directX * Rect[i].speed;
                 Rect[i].y1 += Rect[i].directY * Rect[i].speed;
                 Rect[i].y2 -= Rect[i].directY * Rect[i].speed;
                 cnt_c--;
                 if (cnt_c <= 0) {
-                    max = false;
+                    max_c = false;
                 }
             }
         }
