@@ -11,6 +11,7 @@ GLvoid Mouse(int button, int state, int x, int y);
 GLvoid TimerFunction(int value);
 
 int cnt = 0;
+int cnt_i = 0;
 bool pause;
 bool pressA, pressI, pressC, pressO;
 typedef struct _rect {
@@ -94,10 +95,16 @@ GLvoid Reshape(int w, int h)  //--- 콜백 함수: 다시 그리기 콜백 함수
 GLvoid Keyboard(unsigned char key, int x, int y) {
   switch (key) {
     case 'a':
+      pressI = false;
       pressA = !pressA;
       break;
     case 'i':
+        pressA = false;
+        pressI = !pressI;
       break;
+    case 'o':
+        pressO = !pressO;
+        break;
     case 's':
         pause = !pause;
       glutTimerFunc(50, TimerFunction, 1);
@@ -174,6 +181,30 @@ GLvoid TimerFunction(int value)
             Rect[i].x2 += Rect[i].directX * Rect[i].speed;
             Rect[i].y1 += Rect[i].directY * Rect[i].speed;
             Rect[i].y2 += Rect[i].directY * Rect[i].speed;
+        }
+
+        else if (pressI) {
+            Rect[i].directX = 1;
+            Rect[i].x1 += Rect[i].directX * Rect[i].speed;
+            Rect[i].x2 += Rect[i].directX * Rect[i].speed;
+
+            if (cnt_i <= 200) {
+                Rect[i].directY = 1;
+                cnt_i++;
+            }
+            else if (cnt_i >= 200) {
+                Rect[i].directY = -1;
+                cnt_i--;
+            }
+
+            Rect[i].y1 += Rect[i].directY * Rect[i].speed;
+            Rect[i].y2 += Rect[i].directY * Rect[i].speed;
+        }
+
+        if (pressO) {
+            Rect[i].r = (rand() % 256) / 255.0f;
+            Rect[i].g = (rand() % 256) / 255.0f;
+            Rect[i].b = (rand() % 256) / 255.0f;
         }
     }
 
