@@ -10,6 +10,7 @@ GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Mouse(int button, int state, int x, int y);
 GLvoid Motion(int x, int y);
 
+float size = 0.0f;
 bool left_button;
 typedef struct _rect {
 	float x1;
@@ -19,6 +20,7 @@ typedef struct _rect {
 	float r;
 	float g;
 	float b;
+	bool in;
 }rect;
 rect Rect[20];
 rect eraser;
@@ -32,9 +34,12 @@ void convertDeviceXY2OpenglXY(int x, int y, float* ox, float* oy)
 }
 
 
-bool isinRect(float mx, float my, float x1, float y1, float x2, float y2)
+bool isinRect(float ex1, float ey1, float ex2, float ey2, float x1, float y1, float x2, float y2)
 {
-	if (mx >= x1 && my >= y1 && mx <= x2 && my <= y2) {
+	if (ex1 < x2 && ex2 > x1 && ey1 < y2 && ey2 > y1) {
+		if (x1 == NULL) {
+			return false;
+		}
 		return true;
 	}
 	else
@@ -49,7 +54,8 @@ void Init()
 		x = (rand() % 790 + 1);	y = (rand() % 790 + 1);
 		convertDeviceXY2OpenglXY(x, y, &cx, &cy);
 		Rect[i] = { cx, cy, cx + 0.05f, cy + 0.05f,
-			(rand() % 256) / 255.0f,(rand() % 256) / 255.0f,(rand() % 256) / 255.0f};
+			(rand() % 256) / 255.0f,(rand() % 256) / 255.0f,(rand() % 256) / 255.0f,
+		false};
 	}
 }
 
@@ -94,7 +100,7 @@ GLvoid drawScene()//--- 콜백 함수: 그리기 콜백 함수
 	}
 
 	if (left_button) {
-		glColor3f(0,0,0);
+		glColor3f(eraser.r, eraser.g, eraser.b);
 		glRectf(eraser.x1, eraser.y1, eraser.x2, eraser.y2);
 	}
 
@@ -125,12 +131,18 @@ void Mouse(int button, int state, int x, int y)
 		}
 		else if (state == GLUT_UP) {
 			left_button = false;
+			eraser.r = 0;
+			eraser.g = 0;
+			eraser.b = 0;
+			size = 0.0f;
 		}
 	}
 }
 
 GLvoid Motion(int x, int y)
 {
+	int i;
+
 	if (left_button == true)
 	{
 		//지우개 움직임
@@ -143,14 +155,27 @@ GLvoid Motion(int x, int y)
 		centerX = mx;
 		centerY = my;
 
-		eraser.x1 = centerX - 0.05f;
-		eraser.y1 = centerY - 0.05f;
-		eraser.x2 = centerX + 0.05f;
-		eraser.y2 = centerY + 0.05f;
+		eraser.x1 = centerX - 0.05f - size;
+		eraser.y1 = centerY - 0.05f - size;
+		eraser.x2 = centerX + 0.05f + size;
+		eraser.y2 = centerY + 0.05f + size;
 
 
 		//배경 사각형 충돌
+		for (i = 0; i < 20; i++) {
+			Rect[i].in = isinRect(eraser.x1, eraser.y1, eraser.x2, eraser.y2,
+				Rect[i].x1, Rect[i].y1, Rect[i].x2, Rect[i].y2);
 
+			if (Rect[i].in) {
+				std::cout << "Collision" << std::endl;
+
+				eraser.r = Rect[i].r;
+				eraser.g = Rect[i].g;
+				eraser.b = Rect[i].b;
+				size += 0.01f;
+				Rect[i] = { NULL };
+			}
+		}
 		glutPostRedisplay();
 	}
 }
