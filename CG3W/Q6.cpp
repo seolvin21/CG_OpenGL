@@ -153,11 +153,12 @@ GLvoid Mouse(int button, int state, int x, int y)
 
 GLvoid TimerFunction(int value)
 {
+    int dirX, dirY;
+
     for (int i = 0; i < 4; i++) {
         // Splits 배열에 대한 업데이트 수행
         if (clickedRectIndex != -1) {
             clickedRectIndex = i;
-            std::cout << "-" << i << std::endl;
 
             // 사각형을 작아지는 방향으로 업데이트
             Splits[i].x1 += 0.005f;
@@ -165,8 +166,29 @@ GLvoid TimerFunction(int value)
             Splits[i].x2 -= 0.005f;
             Splits[i].y2 -= 0.005f;
 
-            Splits[i].x1 -= 0.01f;
-            Splits[i].x2 -= 0.01f;
+            switch (i) {
+            case 0:
+                dirX = -1;
+                dirY = 1;
+                break;
+            case 1:
+                dirX = 1;
+                dirY = 1;
+                break;
+            case 2:
+                dirX = -1;
+                dirY = -1;
+                break;
+            case 3:
+                dirX = 1;
+                dirY = -1;
+                break;
+            }
+
+            Splits[i].x1 += 0.01f * dirX;
+            Splits[i].y1 += 0.01f * dirY;
+            Splits[i].x2 += 0.01f * dirX;
+            Splits[i].y2 += 0.01f * dirY;
 
             // 일정 크기 이하로 작아지면 사라지도록 처리
             if (Splits[i].x1 >= Splits[i].x2 || Splits[i].y1 >= Splits[i].y2) {
