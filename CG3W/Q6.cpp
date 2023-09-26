@@ -158,7 +158,6 @@ GLvoid TimerFunction(int value)
     for (int i = 0; i < 4; i++) {
         // Splits 배열에 대한 업데이트 수행
         if (clickedRectIndex != -1) {
-            clickedRectIndex = i;
 
             // 사각형을 작아지는 방향으로 업데이트
             Splits[i].x1 += 0.005f;
@@ -166,29 +165,50 @@ GLvoid TimerFunction(int value)
             Splits[i].x2 -= 0.005f;
             Splits[i].y2 -= 0.005f;
 
-            switch (i) {
-            case 0:
-                dirX = -1;
-                dirY = 1;
-                break;
-            case 1:
-                dirX = 1;
-                dirY = 1;
-                break;
-            case 2:
-                dirX = -1;
-                dirY = -1;
-                break;
-            case 3:
-                dirX = 1;
-                dirY = -1;
-                break;
+            if (clickedRectIndex == 2 || clickedRectIndex == 4) {
+                switch (i) {
+                case 0:
+                    dirX = -1;
+                    dirY = 0;
+                    break;
+                case 1:
+                    dirX = 0;
+                    dirY = 1;
+                    break;
+                case 2:
+                    dirX = 0;
+                    dirY = -1;
+                    break;
+                case 3:
+                    dirX = 1;
+                    dirY = 0;
+                    break;
+                }
             }
-
-            Splits[i].x1 += 0.01f * dirX;
-            Splits[i].y1 += 0.01f * dirY;
-            Splits[i].x2 += 0.01f * dirX;
-            Splits[i].y2 += 0.01f * dirY;
+            else {
+                switch (i) {
+                case 0:
+                    dirX = -1;
+                    dirY = 1;
+                    break;
+                case 1:
+                    dirX = 1;
+                    dirY = 1;
+                    break;
+                case 2:
+                    dirX = -1;
+                    dirY = -1;
+                    break;
+                case 3:
+                    dirX = 1;
+                    dirY = -1;
+                    break;
+                }
+            }
+            Splits[i].x1 += 0.02f * dirX;
+            Splits[i].y1 += 0.02f * dirY;
+            Splits[i].x2 += 0.02f * dirX;
+            Splits[i].y2 += 0.02f * dirY;
 
             // 일정 크기 이하로 작아지면 사라지도록 처리
             if (Splits[i].x1 >= Splits[i].x2 || Splits[i].y1 >= Splits[i].y2) {
