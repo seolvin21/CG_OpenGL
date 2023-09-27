@@ -11,6 +11,7 @@ GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid Mouse(int button, int state, int x, int y);
 GLvoid TimerFunction(int value);
 
+int count;
 bool pause = false;
 typedef struct _rect {
     float x1;  float y1;
@@ -19,7 +20,7 @@ typedef struct _rect {
     bool clicked;
 } rect;
 rect Rect[5];
-rect Splits[4];
+rect Splits[8];
 
 void convertDeviceXY2OpenglXY(int x, int y, float* ox, float* oy)
 {
@@ -67,8 +68,27 @@ void SplitRect(int index)
         Rect[index].r,Rect[index].g ,Rect[index].b };      //좌하단
     Splits[3] = { midX,midY - (RECT_SIZE / 2),midX + (RECT_SIZE / 2),midY,
         Rect[index].r,Rect[index].g ,Rect[index].b };      //우하단
-
-    Rect[index] = { NULL };
+    Splits[4] = {midX - (RECT_SIZE / 2), midY,          midX,
+                 midY + (RECT_SIZE / 2), Rect[index].r, Rect[index].g,
+                 Rect[index].b};  // 좌상단
+    Splits[5] = {midX,
+                 midY,
+                 midX + (RECT_SIZE / 4),
+                 midY + (RECT_SIZE / 4),
+                 Rect[index].r,
+                 Rect[index].g,
+                 Rect[index].b};  // 우상단
+    Splits[6] = {midX - (RECT_SIZE / 4),
+                 midY - (RECT_SIZE / 4),
+                 midX,
+                 midY,
+                 Rect[index].r,
+                 Rect[index].g,
+                 Rect[index].b};  // 좌하단
+    Splits[7] = {midX,         midY - (RECT_SIZE / 4), midX + (RECT_SIZE / 4),
+                 midY,         Rect[index].r,          Rect[index].g,
+                 Rect[index].b};  // 우하단
+    Rect[index] = {NULL};
 }
 
 void main(int argc, char** argv)  // 윈도우 출력하고 콜백함수 설정
@@ -110,7 +130,7 @@ GLvoid drawScene()  //--- 콜백 함수: 그리기 콜백 함수
         glRectf(Rect[i].x1, Rect[i].y1, Rect[i].x2, Rect[i].y2);
     }
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < count; i++) {
         glColor3f(Splits[i].r, Splits[i].g, Splits[i].b);
         glRectf(Splits[i].x1, Splits[i].y1, Splits[i].x2, Splits[i].y2);
     }
@@ -141,6 +161,7 @@ GLvoid Mouse(int button, int state, int x, int y)
         for (int i = 0; i < 5; ++i) {
             Rect[i].clicked = isinRect(mx, my, Rect[i].x1, Rect[i].y1, Rect[i].x2, Rect[i].y2);
             if (Rect[i].clicked) {
+              count = rand() % 2 ? 4 : 8;
                 std::cout << "Rect" << i << " clicked" << std::endl;
                 clickedRectIndex = i;
                 SplitRect(i);
@@ -154,8 +175,8 @@ GLvoid Mouse(int button, int state, int x, int y)
 GLvoid TimerFunction(int value)
 {
     int dirX, dirY;
-
-    for (int i = 0; i < 4; i++) {
+    
+    for (int i = 0; i < count; i++) {
         // Splits 배열에 대한 업데이트 수행
         if (clickedRectIndex != -1) {
 
@@ -164,7 +185,7 @@ GLvoid TimerFunction(int value)
             Splits[i].y1 += 0.005f;
             Splits[i].x2 -= 0.005f;
             Splits[i].y2 -= 0.005f;
-
+         
             if (clickedRectIndex == 2 || clickedRectIndex == 4) {
                 switch (i) {
                 case 0:
@@ -213,15 +234,13 @@ GLvoid TimerFunction(int value)
             // 일정 크기 이하로 작아지면 사라지도록 처리
             if (Splits[i].x1 >= Splits[i].x2 || Splits[i].y1 >= Splits[i].y2) {
                 Splits[i] = { NULL };
-                clickedRectIndex = -1;
             }
         }
     }
 
     glutPostRedisplay();
 
-    if (!pause && clickedRectIndex != -1) {
+    if (!pause) {
         glutTimerFunc(100, TimerFunction, 1);
     }
-
 }
