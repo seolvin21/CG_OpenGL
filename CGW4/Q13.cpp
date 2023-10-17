@@ -10,6 +10,8 @@
 #include <gl/glm/glm/ext.hpp>
 #include <gl/glm/glm/gtc/matrix_transform.hpp>
 
+#define WIDTH 800
+#define HEIGHT 600
 //--- 메인 함수
 //--- 함수 선언 추가하기
 
@@ -45,10 +47,8 @@ float rect[4][3] = {
 
 void convert(int x, int y, float* ox, float* oy)
 {
-	int w = 800;
-	int h = 600;
-	*ox = (float)((x - (float)w / 2.0) * (float)(1.0 / (float)(w / 2.0)));
-	*oy = -(float)((y - (float)h / 2.0) * (float)(1.0 / (float)(h / 2.0)));
+	*ox = (float)((x - (float)WIDTH / 2.0) * (float)(1.0 / (float)(WIDTH / 2.0)));
+	*oy = -(float)((y - (float)HEIGHT / 2.0) * (float)(1.0 / (float)(HEIGHT / 2.0)));
 }
 
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
