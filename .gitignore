@@ -42,7 +42,7 @@ x64/
 
 ##files
 # *.sln
-**/*.vcxproj
-**/*.vcxproj.*
+# **/*.vcxproj
+# **/*.vcxproj.*
 **/*.i
 **/*.obj
