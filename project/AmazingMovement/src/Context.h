@@ -9,9 +9,11 @@ private:
 	CShader* m_program;
 	//std::vector<CMesh*>m_meshes;
 	CMesh* m_box;
+
 	CMesh* m_tetra;
 
 	int tree_count = 10;
+
 
 	// object
 	float m_obj_radian_x{ 0.0f };
@@ -26,7 +28,7 @@ private:
 
 
 	// camera front 방향 결정 각도
-	float m_camera_pitch{ -10.0f }; // x축
+	float m_camera_pitch{ -15.0f }; // x축
 	float m_camera_yaw{ 0.0f }; // y축
 	// roll 대신 up vector로 컨트롤
 
@@ -47,8 +49,16 @@ private:
 
 	// 객체 변환 변수
 	float m_light_obj_y{ 0.0f };
-	std::vector<std::vector<float>> cube_color;
+	int cube_speed{ 100 };
 
+	// 플레이어 큐브
+	std::vector<std::vector<glm::vec3>> player_color;
+	int color_cnt[3][3]; // 플레이어만 필요
+	float player_z{ 11.0f };
+
+	// 오는 큐브
+	std::vector<std::vector<glm::vec3>> cube_color; // 맞춰야하는 큐브
+	float cube_z{-20.0f};
 public:
 	CContext();
 	~CContext();
@@ -60,5 +70,10 @@ public:
 	void Time(int value);
 	void Render();
 	void Update();
+
+	// 간단한 함수
+	void GenCube();
+	bool CheckColor();
+	int GetSpeed() { return cube_speed; }
 };
 

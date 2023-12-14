@@ -6,7 +6,8 @@ using std::cout;
 using std::endl;
 void PrintKey()
 {
-	cout << "q : 프로그램 종료" << endl;
+	cout << "o : 색깔 초기화" << endl;
+	cout << "p : 프로그램 종료" << endl;
 }
 
 void DrawScene()
@@ -36,21 +37,21 @@ void Motion(int x, int y)
 void Time(int value)
 {
 	context.Time(value);
-	glutTimerFunc(1000, Time, 1);
+	glutTimerFunc(context.GetSpeed(), Time, 1);
 }
 
 int main(int argc, char** argv)
 {
+
+	PlaySound(TEXT(SOUND_FILE_BGM), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP | SND_NODEFAULT);
+
 	CGL::GetInstance()->InitWindow(argc, argv, WIDTH, HEIGHT, "Amazing Movement");
 	CGL::GetInstance()->Render(DrawScene);
 
 	context.Init();
 	// 깊이 검사 설정
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 
 	PrintKey();
 
@@ -62,6 +63,5 @@ int main(int argc, char** argv)
 
 	// 깊이 
 	glDisable(GL_DEPTH_TEST);
-	//glDisable(GL_CULL_FACE);
 }
 
